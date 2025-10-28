@@ -1,0 +1,23 @@
+# --- Normal Traffic ---
+2025-10-10 23:25:10 | HTTP | 192.168.1.105 | 172.217.167.78 | port:80
+2025-10-10 23:25:15 | DNS | 192.168.1.102 | 8.8.8.8 | port:53
+2025-10-10 23:25:20 | ARP | 192.168.1.1 | is-at | 00:1A:2B:3C:4D:5E  # Legitimate ARP from router
+
+# --- SSH Brute Force Attack Simulation ---
+# An attacker (104.28.55.119) tries to log into our server (192.168.1.100) repeatedly.
+2025-10-10 23:26:05 | SSH | 104.28.55.119 | 192.168.1.100 | port:22 status:FAIL
+2025-10-10 23:26:15 | SSH | 104.28.55.119 | 192.168.1.100 | port:22 status:FAIL
+2025-10-10 23:26:28 | SSH | 104.28.55.119 | 192.168.1.100 | port:22 status:FAIL
+2025-10-10 23:26:40 | SSH | 104.28.55.119 | 192.168.1.100 | port:22 status:FAIL
+2025-10-10 23:26:55 | SSH | 104.28.55.119 | 192.168.1.100 | port:22 status:FAIL
+2025-10-10 23:27:10 | SSH | 104.28.55.119 | 192.168.1.100 | port:22 status:FAIL # The 6th attempt in just over a minute. This should trigger an alert.
+
+# --- More Normal Traffic ---
+2025-10-10 23:28:00 | HTTP | 192.168.1.102 | 93.184.216.34 | port:80
+2025-10-10 23:28:05 | SSH | 192.168.1.105 | 192.168.1.100 | port:22 status:SUCCESS # A legitimate login
+
+# --- ARP Spoofing Attack Simulation ---
+# First, a legitimate device announces its MAC address.
+2025-10-10 23:29:00 | ARP | 192.168.1.105 | is-at | 11:22:33:44:55:66 # Legitimate client
+# Now, an attacker (at MAC AA:BB:CC:DD:EE:FF) claims to have the SAME IP as the legitimate device.
+2025-10-10 23:29:30 | ARP | 192.168.1.105 | is-at | AA:BB:CC:DD:EE:FF # Malicious ARP packet! This should trigger an alert.
